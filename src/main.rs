@@ -1,15 +1,29 @@
+#![allow(dead_code)]
 use std::{
     collections::HashMap,
     fmt::{self, Display},
-    fs,
+    fs::{self, File},
+    io::{self, BufRead, BufReader},
+    path::Path,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 struct Temp {
     min: f32,
     max: f32,
     sum: f32,
     count: u32,
+}
+
+impl Temp {
+    fn new(min: f32, max: f32, sum: f32, count: u32) -> Self {
+        Temp {
+            min,
+            max,
+            sum,
+            count,
+        }
+    }
 }
 
 impl Display for Temp {
@@ -22,7 +36,7 @@ impl Display for Temp {
     }
 }
 
-fn main() {
+fn hashmap_method() {
     let file = fs::read_to_string("rows.text").unwrap();
 
     let mut results: HashMap<&str, Temp> = HashMap::new();
@@ -40,15 +54,51 @@ fn main() {
                 e.sum += temp;
                 e.count += 1;
             })
-            .or_insert(Temp {
-                min: temp,
-                max: temp,
-                sum: temp,
-                count: 1,
-            });
+            .or_insert(Temp::new(temp, temp, temp, 1));
     }
+
+    // sort by city name
+    let mut results: Vec<_> = results.into_iter().collect();
+    results.sort_by(|a, b| a.0.cmp(b.0));
 
     for (city, temp) in results {
         println!("{} - {}", city, temp)
     }
+}
+
+// The output is wrapped in a Result to allow matching on errors.
+// Returns an Iterator to the Reader of the lines of the file.
+
+fn buf_method() -> Result<(), Box<dyn std::error::Error>> {
+    let file = File::open("rows.text").unwrap();
+    let reader = BufReader::new(file);
+
+    let mut results: HashMap<&str, Temp> = HashMap::new();
+
+    for line in reader.lines() {
+        match line {
+            Ok(line) => {
+                let words = line.split(';').collect::<Vec<&str>>();
+                let city = words[0];
+                let temp: f32 = words[1].parse().unwrap_or(0.0);
+
+                results
+                    .entry(city)
+                    .and_modify(|e| {
+                        e.min = e.min.min(temp);
+                        e.max = e.max.max(temp);
+                        e.sum += temp;
+                        e.count += 1;
+                    })
+                    .or_insert(Temp::new(temp, temp, temp, 1));
+            }
+            Err(e) => return Err(Box::new(e)),
+        }
+    }
+
+    Ok(())
+}
+
+fn main() {
+    buf_method().unwrap();
 }
