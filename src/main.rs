@@ -78,12 +78,12 @@ fn buf_method() -> Result<(), Box<dyn std::error::Error>> {
     for line in reader.lines() {
         match line {
             Ok(line) => {
-                let words = line.split(';').collect::<Vec<&str>>();
-                let city = words[0];
-                let temp: f32 = words[1].parse().unwrap_or(0.0);
+                let mut parts = line.split(';').clone();
+                let city = parts.next().unwrap().to_owned();
+                let temp = parts.next().unwrap().parse().unwrap_or(0.0).to_owned();
 
                 results
-                    .entry(city)
+                    .entry(&city)
                     .and_modify(|e| {
                         e.min = e.min.min(temp);
                         e.max = e.max.max(temp);
