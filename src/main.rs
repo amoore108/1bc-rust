@@ -3,8 +3,7 @@ use std::{
     collections::HashMap,
     fmt::{self, Display},
     fs::{self, File},
-    io::{self, BufRead, BufReader},
-    path::Path,
+    io::{BufRead, BufReader},
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -36,7 +35,7 @@ impl Display for Temp {
     }
 }
 
-fn hashmap_method() {
+fn read_to_string_method() {
     let file = fs::read_to_string("rows.text").unwrap();
 
     let mut results: HashMap<&str, Temp> = HashMap::new();
@@ -66,24 +65,21 @@ fn hashmap_method() {
     }
 }
 
-// The output is wrapped in a Result to allow matching on errors.
-// Returns an Iterator to the Reader of the lines of the file.
-
-fn buf_method() -> Result<(), Box<dyn std::error::Error>> {
+fn buf_method() {
     let file = File::open("rows.text").unwrap();
     let reader = BufReader::new(file);
 
-    let mut results: HashMap<&str, Temp> = HashMap::new();
+    let mut results: HashMap<String, Temp> = HashMap::new();
 
     for line in reader.lines() {
         match line {
             Ok(line) => {
-                let mut parts = line.split(';').clone();
-                let city = parts.next().unwrap().to_owned();
-                let temp = parts.next().unwrap().parse().unwrap_or(0.0).to_owned();
+                let words = line.split(';').collect::<Vec<&str>>();
+                let city = words[0].to_string();
+                let temp: f32 = words[1].parse().unwrap_or(0.0);
 
                 results
-                    .entry(&city)
+                    .entry(city)
                     .and_modify(|e| {
                         e.min = e.min.min(temp);
                         e.max = e.max.max(temp);
@@ -92,13 +88,15 @@ fn buf_method() -> Result<(), Box<dyn std::error::Error>> {
                     })
                     .or_insert(Temp::new(temp, temp, temp, 1));
             }
-            Err(e) => return Err(Box::new(e)),
+            Err(_) => unimplemented!(),
         }
     }
 
-    Ok(())
+    // sort by city name
+    let mut results: Vec<_> = results.into_iter().collect();
+    results.sort_by(|a, b| a.0.cmp(&b.0));
 }
 
 fn main() {
-    buf_method().unwrap();
+    buf_method();
 }
