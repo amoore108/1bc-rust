@@ -4,6 +4,7 @@ use std::{
     fmt::{self, Display},
     fs::{self, File},
     io::{BufRead, BufReader},
+    time::Instant,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -59,10 +60,6 @@ fn read_to_string_method() {
     // sort by city name
     let mut results: Vec<_> = results.into_iter().collect();
     results.sort_by(|a, b| a.0.cmp(b.0));
-
-    for (city, temp) in results {
-        println!("{} - {}", city, temp)
-    }
 }
 
 fn buf_method() {
@@ -98,5 +95,9 @@ fn buf_method() {
 }
 
 fn main() {
+    let start = Instant::now();
     buf_method();
+    let duration = start.elapsed();
+
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
 }
