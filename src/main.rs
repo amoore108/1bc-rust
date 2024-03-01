@@ -99,5 +99,5 @@ fn main() {
     buf_method();
     let duration = start.elapsed();
 
-    println!("Time elapsed in expensive_function() is: {:?}", duration);
+    println!("Time elapsed is: {:?}", duration);
 }
