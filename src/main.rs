@@ -44,7 +44,7 @@ fn read_to_string_method() {
     for line in file.lines() {
         let words = line.split(';').collect::<Vec<&str>>();
         let city = words[0];
-        let temp: f32 = words[1].parse().unwrap_or(0.0);
+        let temp = words[1].parse().unwrap_or(0.0);
 
         results
             .entry(city)
@@ -73,7 +73,7 @@ fn buf_method() {
             Ok(line) => {
                 let words = line.split(';').collect::<Vec<&str>>();
                 let city = words[0].to_string();
-                let temp: f32 = words[1].parse().unwrap_or(0.0);
+                let temp = words[1].parse().unwrap_or(0.0);
 
                 results
                     .entry(city)
