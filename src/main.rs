@@ -1,8 +1,7 @@
-#![allow(dead_code)]
 use std::{
     collections::HashMap,
     fmt::{self, Display},
-    fs::{self, File},
+    fs::File,
     io::{BufRead, BufReader},
     time::Instant,
 };
@@ -34,32 +33,6 @@ impl Display for Temp {
             self.min, self.max, self.count
         )
     }
-}
-
-fn read_to_string_method() {
-    let file = fs::read_to_string("rows.text").unwrap();
-
-    let mut results: HashMap<&str, Temp> = HashMap::new();
-
-    for line in file.lines() {
-        let words = line.split(';').collect::<Vec<&str>>();
-        let city = words[0];
-        let temp = words[1].parse().unwrap_or(0.0);
-
-        results
-            .entry(city)
-            .and_modify(|e| {
-                e.min = e.min.min(temp);
-                e.max = e.max.max(temp);
-                e.sum += temp;
-                e.count += 1;
-            })
-            .or_insert(Temp::new(temp, temp, temp, 1));
-    }
-
-    // sort by city name
-    let mut results: Vec<_> = results.into_iter().collect();
-    results.sort_by(|a, b| a.0.cmp(b.0));
 }
 
 fn buf_method() {
